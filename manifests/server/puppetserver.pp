@@ -61,22 +61,22 @@ class puppet::server::puppetserver (
 
   # JVM puppetserver doesn't respect 'ca' parameter in puppet.conf, only in bootstrap.cfg
   $puppetserver_ca_enabled_ensure = $server_ca ? {
-    true => 'present'
-    default => 'absent'
+    true => 'present',
+    default => 'absent',
   }
   $puppetserver_ca_disabled_ensure = $server_ca ? {
-    true => 'absent'
-    default => 'present'
+    true => 'absent',
+    default => 'present',
   }
   file_line { 'puppetserver_bootstrap.cfg_ca_enabled':
     path => "${dir}/bootstrap.cfg",
     ensure => $puppetserver_ca_enabled_ensure,
-    line => 'puppetlabs.services.ca.certificate-authority-service/certificate-authority-service'
+    line => 'puppetlabs.services.ca.certificate-authority-service/certificate-authority-service',
   }
   file_line { 'puppetserver_bootstrap.cfg_ca_disabled':
     path => "${dir}/bootstrap.cfg",
     ensure => $puppetserver_ca_disabled_ensure,
-    line => 'puppetlabs.services.ca.certificate-authority-disabled-service/certificate-authority-disabled-service'
+    line => 'puppetlabs.services.ca.certificate-authority-disabled-service/certificate-authority-disabled-service',
   }
 
 }
