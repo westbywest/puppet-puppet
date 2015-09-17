@@ -74,23 +74,23 @@ class puppet::params {
 
     default : {
       if $aio_package {
-        $dir      = '/etc/puppetlabs/puppet'
-        $codedir  = '/etc/puppetlabs/code'
-        $logdir   = '/var/log/puppetlabs/puppet'
-        $rundir   = '/var/run/puppetlabs'
-        $ssldir   = '/etc/puppetlabs/puppet/ssl'
-        $vardir   = '/opt/puppetlabs/puppet/cache'
-        $sharedir = '/opt/puppetlabs/puppet'
-        $jvm_dir  = '/etc/puppetlabs/puppetserver'
+        $dir            = '/etc/puppetlabs/puppet'
+        $codedir        = '/etc/puppetlabs/code'
+        $logdir         = '/var/log/puppetlabs/puppet'
+        $rundir         = '/var/run/puppetlabs'
+        $ssldir         = '/etc/puppetlabs/puppet/ssl'
+        $vardir         = '/opt/puppetlabs/puppet/cache'
+        $sharedir       = '/opt/puppetlabs/puppet'
+        $server_jvm_dir = '/etc/puppetlabs/puppetserver'
       } else {
-        $dir        = '/etc/puppet'
-        $codedir    = '/etc/puppet'
-        $logdir     = '/var/log/puppet'
-        $rundir     = '/var/run/puppet'
-        $ssldir     = '/var/lib/puppet/ssl'
-        $vardir     = '/var/lib/puppet'
-        $sharedir   = '/usr/share/puppet'
-        $jvm_dir    = '/etc/puppetserver'
+        $dir            = '/etc/puppet'
+        $codedir        = '/etc/puppet'
+        $logdir         = '/var/log/puppet'
+        $rundir         = '/var/run/puppet'
+        $ssldir         = '/var/lib/puppet/ssl'
+        $vardir         = '/var/lib/puppet'
+        $sharedir       = '/usr/share/puppet'
+        $server_jvm_dir = '/etc/puppetserver'
       }
       $root_group = undef
     }
