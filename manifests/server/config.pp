@@ -20,6 +20,7 @@ class puppet::server::config inherits puppet::config {
 
   ## General configuration
   $ca_server                   = $::puppet::ca_server
+  $server_ca                   = $::puppet::server_ca
   $ca_port                     = $::puppet::ca_port
   $server_storeconfigs_backend = $::puppet::server_storeconfigs_backend
   $server_external_nodes       = $::puppet::server_external_nodes
@@ -63,19 +64,25 @@ class puppet::server::config inherits puppet::config {
   if versioncmp($::puppetversion, '3.4.0') >= 0 {
     # If the ssl dir is not the default dir, it needs to be created before running
     # the generate ca cert or it will fail.
+    $create_ssl_dir_before = $server_ca ? {
+      true => Exec['puppet_server_config-generate_ca_cert'],
+      default => undef,
+    }
     exec {'puppet_server_config-create_ssl_dir':
       creates => $::puppet::server_ssl_dir,
       command => "/bin/mkdir -p ${::puppet::server_ssl_dir}",
       umask   => '0022',
-      before  => Exec['puppet_server_config-generate_ca_cert'],
+      before  => $create_ssl_dir_before,
     }
 
     # Generate a new CA and host cert if our host cert doesn't exist
-    exec {'puppet_server_config-generate_ca_cert':
-      creates => $::puppet::server::ssl_cert,
-      command => "${puppet::puppetca_path}/${puppet::puppetca_bin} --generate ${::fqdn}",
-      umask   => '0022',
-      require => Concat["${puppet::server_dir}/puppet.conf"],
+    if ($server_ca) {
+      exec {'puppet_server_config-generate_ca_cert':
+        creates => $::puppet::server::ssl_cert,
+        command => "${puppet::puppetca_path}/${puppet::puppetca_bin} --generate ${::fqdn}",
+        umask   => '0022',
+        require => Concat["${puppet::server_dir}/puppet.conf"],
+      }
     }
   } else {
     # Copy of above without umask for pre-3.4
@@ -92,7 +99,7 @@ class puppet::server::config inherits puppet::config {
     }
   }
 
-  if $puppet::server_passenger and $::puppet::server_implementation == 'master' {
+  if $puppet::server_passenger and $::puppet::server_implementation == 'master' and $server_ca {
     Exec['puppet_server_config-generate_ca_cert'] ~> Service[$puppet::server_httpd_service]
   }
 
