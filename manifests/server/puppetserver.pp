@@ -39,6 +39,9 @@ class puppet::server::puppetserver (
   $config            = $::puppet::server_jvm_config,
   $dir               = $::puppet::server_jvm_dir,
   $server_ca         = $::puppet::server_ca,
+  $ssl_cert          = $::puppet::server::ssl_cert,
+  $ssl_key           = $::puppet::server::ssl_key,
+  $ssl_ca_cert       = $::puppet::server::ssl_ca_cert,
   $jvm_min_heap_size = $::puppet::server_jvm_min_heap_size,
   $jvm_max_heap_size = $::puppet::server_jvm_max_heap_size,
   $jvm_extra_args    = $::puppet::server_jvm_extra_args,
@@ -79,4 +82,23 @@ class puppet::server::puppetserver (
     line => 'puppetlabs.services.ca.certificate-authority-disabled-service/certificate-authority-disabled-service',
   }
 
+  # If we are not CA, specify ssl-key, ssl-cert, ssl-ca-cert for Jetty.
+  # The chaining works around https://tickets.puppetlabs.com/browse/MODULES-1880
+  if (! $server_ca) {
+    file_line { 'Add ssl cert':
+      path => "${dir}/conf.d/webserver.conf",
+      line => " ssl-cert = ${ssl_cert}",
+      after => '^.*ssl-port =.*',
+    } ->
+    file_line { 'Add ssl key':
+      path => "${dir}/conf.d/webserver.conf",
+      line => " ssl-key = ${ssl_key}",
+      after => '^.*ssl-cert =.*',
+    } ->
+    file_line { 'Add ssl ca-cert':
+      path => "${dir}/conf.d/webserver.conf",
+      line => " ssl-ca-cert = ${ssl_ca_cert}",
+      after => '^.*ssl-key =.*',
+    }
+  }
 }
