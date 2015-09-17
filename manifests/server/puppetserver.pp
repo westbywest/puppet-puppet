@@ -40,7 +40,7 @@ class puppet::server::puppetserver (
   $dir               = $::puppet::server_jvm_dir,
   $server_ca         = $::puppet::server_ca,
   $ssl_cert          = $::puppet::server::ssl_cert,
-  $ssl_key           = $::puppet::server::ssl_key,
+  $ssl_cert_key      = $::puppet::server::ssl_cert_key,
   $ssl_ca_cert       = $::puppet::server::ssl_ca_cert,
   $jvm_min_heap_size = $::puppet::server_jvm_min_heap_size,
   $jvm_max_heap_size = $::puppet::server_jvm_max_heap_size,
@@ -92,7 +92,7 @@ class puppet::server::puppetserver (
     } ->
     file_line { 'Add ssl key':
       path => "${dir}/conf.d/webserver.conf",
-      line => " ssl-key = ${ssl_key}",
+      line => " ssl-key = ${ssl_cert_key}",
       after => '^.*ssl-cert =.*',
     } ->
     file_line { 'Add ssl ca-cert':
