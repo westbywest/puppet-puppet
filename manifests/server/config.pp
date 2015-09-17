@@ -61,40 +61,30 @@ class puppet::server::config inherits puppet::config {
   }
 
   # 3.4.0+ supports umask
-  if versioncmp($::puppetversion, '3.4.0') >= 0 {
-    # If the ssl dir is not the default dir, it needs to be created before running
-    # the generate ca cert or it will fail.
-    $create_ssl_dir_before = $server_ca ? {
-      true => Exec['puppet_server_config-generate_ca_cert'],
-      default => undef,
-    }
-    exec {'puppet_server_config-create_ssl_dir':
-      creates => $::puppet::server_ssl_dir,
-      command => "/bin/mkdir -p ${::puppet::server_ssl_dir}",
-      umask   => '0022',
-      before  => $create_ssl_dir_before,
-    }
+  $puppet_ssl_umask = (versioncmp($::puppetversion, '3.4.0') >= 0) ? {
+    true => '0022',
+    default => undef
+  }
 
-    # Generate a new CA and host cert if our host cert doesn't exist
-    if ($server_ca) {
-      exec {'puppet_server_config-generate_ca_cert':
-        creates => $::puppet::server::ssl_cert,
-        command => "${puppet::puppetca_path}/${puppet::puppetca_bin} --generate ${::fqdn}",
-        umask   => '0022',
-        require => Concat["${puppet::server_dir}/puppet.conf"],
-      }
-    }
-  } else {
-    # Copy of above without umask for pre-3.4
-    exec {'puppet_server_config-create_ssl_dir':
-      creates => $::puppet::server_ssl_dir,
-      command => "/bin/mkdir -p ${::puppet::server_ssl_dir}",
-      before  => Exec['puppet_server_config-generate_ca_cert'],
-    }
+  # If the ssl dir is not the default dir, it needs to be created before running
+  # the generate ca cert or it will fail.
+  $create_ssl_dir_before = $server_ca ? {
+    true => Exec['puppet_server_config-generate_ca_cert'],
+    default => undef,
+  }
+  exec {'puppet_server_config-create_ssl_dir':
+    creates => $::puppet::server_ssl_dir,
+    command => "/bin/mkdir -p ${::puppet::server_ssl_dir}",
+    umask   => $puppet_ssl_umask,
+    before  => $create_ssl_dir_before,
+  }
 
+  # Generate a new CA cert and host cert if our host cert doesn't exist and we are the CA.
+  if ($server_ca) {
     exec {'puppet_server_config-generate_ca_cert':
       creates => $::puppet::server::ssl_cert,
       command => "${puppet::puppetca_path}/${puppet::puppetca_bin} --generate ${::fqdn}",
+      umask   => $puppet_ssl_umask,
       require => Concat["${puppet::server_dir}/puppet.conf"],
     }
   }

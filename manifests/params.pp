@@ -81,6 +81,7 @@ class puppet::params {
         $ssldir   = '/etc/puppetlabs/puppet/ssl'
         $vardir   = '/opt/puppetlabs/puppet/cache'
         $sharedir = '/opt/puppetlabs/puppet'
+        $jvm_dir  = '/etc/puppetlabs/puppetserver'
       } else {
         $dir        = '/etc/puppet'
         $codedir    = '/etc/puppet'
@@ -89,6 +90,7 @@ class puppet::params {
         $ssldir     = '/var/lib/puppet/ssl'
         $vardir     = '/var/lib/puppet'
         $sharedir   = '/usr/share/puppet'
+        $jvm_dir    = '/etc/puppetserver'
       }
       $root_group = undef
     }

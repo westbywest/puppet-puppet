@@ -37,6 +37,8 @@
 class puppet::server::puppetserver (
   $java_bin          = $::puppet::server_jvm_java_bin,
   $config            = $::puppet::server_jvm_config,
+  $dir               = $::puppet::server_jvm_dir,
+  $server_ca         = $::puppet::server_ca,
   $jvm_min_heap_size = $::puppet::server_jvm_min_heap_size,
   $jvm_max_heap_size = $::puppet::server_jvm_max_heap_size,
   $jvm_extra_args    = $::puppet::server_jvm_extra_args,
@@ -55,6 +57,26 @@ class puppet::server::puppetserver (
       "set JAVA_ARGS '\"${jvm_cmd}\"'",
       "set JAVA_BIN ${java_bin}",
     ],
+  }
+
+  # JVM puppetserver doesn't respect 'ca' parameter in puppet.conf, only in bootstrap.cfg
+  $puppetserver_ca_enabled_ensure = $server_ca ? {
+    true => 'present'
+    default => 'absent'
+  }
+  $puppetserver_ca_disabled_ensure = $server_ca ? {
+    true => 'absent'
+    default => 'present'
+  }
+  file_line { 'puppetserver_bootstrap.cfg_ca_enabled':
+    path => "${dir}/bootstrap.cfg",
+    ensure => $puppetserver_ca_enabled_ensure,
+    line => 'puppetlabs.services.ca.certificate-authority-service/certificate-authority-service'
+  }
+  file_line { 'puppetserver_bootstrap.cfg_ca_disabled':
+    path => "${dir}/bootstrap.cfg",
+    ensure => $puppetserver_ca_disabled_ensure,
+    line => 'puppetlabs.services.ca.certificate-authority-disabled-service/certificate-authority-disabled-service'
   }
 
 }

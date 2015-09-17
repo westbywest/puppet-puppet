@@ -367,6 +367,8 @@
 #
 # $server_jvm_config::             Specify the puppetserver jvm configuration file.
 #
+# $server_jvm_dir::                Specify the puppetserver jvm directory.
+#
 # $server_jvm_min_heap_size::      Specify the minimum jvm heap space.
 #
 # $server_jvm_max_heap_size::      Specify the maximum jvm heap space.
@@ -521,6 +523,7 @@ class puppet (
   $server_environment_timeout    = $puppet::params::server_environment_timeout,
   $server_jvm_java_bin           = $puppet::params::server_jvm_java_bin,
   $server_jvm_config             = $puppet::params::server_jvm_config,
+  $server_jvm_dir                = $puppet::params::server_jvm_dir,
   $server_jvm_min_heap_size      = $puppet::params::server_jvm_min_heap_size,
   $server_jvm_max_heap_size      = $puppet::params::server_jvm_max_heap_size,
   $server_jvm_extra_args         = $puppet::params::server_jvm_extra_args,
@@ -592,6 +595,7 @@ class puppet (
   if $server_implementation == 'puppetserver' {
     validate_re($server_jvm_min_heap_size, '^[0-9]+[kKmMgG]$')
     validate_re($server_jvm_max_heap_size, '^[0-9]+[kKmMgG]$')
+    validate_absolute_path($server_jvm_dir)
   }
 
   include ::puppet::config
