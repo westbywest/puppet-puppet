@@ -88,6 +88,16 @@ class puppet::server::config inherits puppet::config {
       require => Concat["${puppet::server_dir}/puppet.conf"],
     }
   }
+  # Otherwise run puppet agent to retrieve certs from the CA.
+  else {
+    exec {'puppet_server_config-retrieve_cert':
+      creates => $::puppet::server::ssl_cert,
+      command => "${puppet::puppetca_path}/puppet agent -t --noop --waitforcert=60",
+      returns => [0, 1],
+      umask   => $puppet_ssl_umask,
+      require => Concat["${puppet::server_dir}/puppet.conf"],
+    }
+  }
 
   if $puppet::server_passenger and $::puppet::server_implementation == 'master' and $server_ca {
     Exec['puppet_server_config-generate_ca_cert'] ~> Service[$puppet::server_httpd_service]
